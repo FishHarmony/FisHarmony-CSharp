@@ -61,6 +61,7 @@ namespace FisHarmonyJob
             break;
           case 5:
           case 10:
+            log.WriteLine("Length: " + propertyItem.Len);
             UInt32 numberator = BitConverter.ToUInt32(propertyItem.Value, 0);
             UInt32 denominator = BitConverter.ToUInt32(propertyItem.Value, 4);
 
