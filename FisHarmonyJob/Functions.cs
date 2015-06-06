@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using Dapper;
 using Microsoft.Azure.WebJobs;
+using Npgsql;
 
 namespace FisHarmonyJob
 {
@@ -129,6 +132,130 @@ namespace FisHarmonyJob
       {
         log.WriteLine(value.Key.ToString() + ": " + value.Value);
       }
+    }
+
+    public static void ProcessImage(
+      [QueueTrigger("processimage")] BlobInformation blobInfo,
+      [Blob("image/{BlobName}", FileAccess.Read)] Stream input,
+      TextWriter log)
+    {
+      // North and East indicate positive, South and West indicate negative directions
+
+      Image image = Image.FromStream(input);
+
+      System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
+
+      Dictionary<Type, string> values = new Dictionary<Type, string>();
+
+      foreach (var propertyItem in image.PropertyItems)
+      {
+        if (!Enum.IsDefined(typeof(Type), propertyItem.Id))
+          continue;
+
+        StringBuilder value = new StringBuilder();
+        switch (propertyItem.Type)
+        {
+          case 1:
+            value.Append(BitConverter.ToBoolean(propertyItem.Value, 0).ToString());
+            break;
+          case 2:
+            value.Append(encoding.GetString(propertyItem.Value, 0, propertyItem.Len - 1));
+            break;
+          case 3:
+            value.Append(BitConverter.ToInt16(propertyItem.Value, 0).ToString());
+            break;
+          case 4:
+          case 9:
+            value.Append(BitConverter.ToInt32(propertyItem.Value, 0).ToString());
+            break;
+          case 5:
+          case 10:
+            int iterations = propertyItem.Len / 8;
+            List<decimal> rational = new List<decimal>();
+            for (int i = 0; i < iterations; i++)
+            {
+              if (i > 0)
+                value.Append(" ");
+
+              UInt32 numberator = BitConverter.ToUInt32(propertyItem.Value, i * 8);
+              UInt32 denominator = BitConverter.ToUInt32(propertyItem.Value, (i * 8) + 4);
+
+              if (denominator != 0)
+                rational.Add((decimal)numberator / (decimal)denominator);
+              else
+                rational.Add(0);
+            }
+
+            if (iterations == 3 && (
+              (((Type)propertyItem.Id) == Type.GPSLatitude || ((Type)propertyItem.Id) == Type.GPSLongitude)))
+            {
+              decimal degrees = rational[0];
+              decimal minutes = rational[1];
+              decimal seconds = rational[2];
+
+              var m = minutes + (seconds / 60);
+              var d = m / 60;
+              decimal decimalDegrees = degrees + d;
+              value.Append(decimalDegrees.ToString());
+            }
+            else
+            {
+              value.Append(string.Join(":", rational));
+            }
+
+            break;
+          default:
+            value.Append("default");
+            break;
+        }
+        values.Add((Type)propertyItem.Id, value.ToString());
+      }
+
+      if (values.ContainsKey(Type.GPSLatitudeRef) && values.ContainsKey(Type.GPSLatitude) && values[Type.GPSLatitudeRef] == "S")
+      {
+        values[Type.GPSLatitude] = (decimal.Parse(values[Type.GPSLatitude]) * -1).ToString();
+      }
+
+      if (values.ContainsKey(Type.GPSLongitudeRef) && values.ContainsKey(Type.GPSLongitude) && values[Type.GPSLongitudeRef] == "W")
+      {
+        values[Type.GPSLongitude] = (decimal.Parse(values[Type.GPSLongitude]) * -1).ToString();
+      }
+      DateTime dateTime = DateTime.UtcNow;
+      if (values.ContainsKey(Type.GPSTimeStamp) && values.ContainsKey(Type.GPSDateStamp))
+      {
+        
+        if (DateTime.TryParse(values[Type.GPSDateStamp].Replace(":", "/") + " " + values[Type.GPSTimeStamp], out dateTime))
+        {
+          log.WriteLine(dateTime.ToString());
+        }
+      }
+
+      foreach (var value in values)
+      {
+        log.WriteLine(value.Key.ToString() + ": " + value.Value);
+      }
+
+      NpgsqlConnection conn = new NpgsqlConnection(ConfigurationManager.ConnectionStrings["PostgreSQL"].ConnectionString);
+      conn.Open();
+      try
+      {
+        conn.Execute(
+        "UPDATE reports SET latitude = @latitude, longitude = @longitude, compass_direction = @compass_direction, picture_taken_at = @picture_taken_At WHERE submitter_id = @submitter_id",
+        new
+        {
+          latitude = values[Type.GPSLatitude],
+          longitude = values[Type.GPSLongitude],
+          compass_direction = values[Type.GPSImgDirection].ToString(),
+          picture_taken_at = dateTime,
+          submitter_id = blobInfo.DeviceId
+        });
+      }
+      finally
+      {
+        conn.Close();
+      }
+
+
     }
   }
 
