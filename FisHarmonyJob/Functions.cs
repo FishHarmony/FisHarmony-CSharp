@@ -1,7 +1,5 @@
 ﻿using System.Drawing;
 using System.IO;
-using System.Threading.Tasks;
-using System.Web.Helpers;
 using Microsoft.Azure.WebJobs;
 
 namespace FisHarmonyJob
