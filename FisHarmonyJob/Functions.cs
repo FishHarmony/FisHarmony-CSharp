@@ -136,7 +136,7 @@ namespace FisHarmonyJob
 
     public static void ProcessImage(
       [QueueTrigger("processimage")] BlobInformation blobInfo,
-      [Blob("image/{BlobName}", FileAccess.Read)] Stream input,
+      [Blob("image/original/{BlobName}", FileAccess.Read)] Stream input,
       TextWriter log)
     {
       // North and East indicate positive, South and West indicate negative directions
