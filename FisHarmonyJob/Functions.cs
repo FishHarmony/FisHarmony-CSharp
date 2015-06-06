@@ -35,10 +35,21 @@ namespace FisHarmonyJob
     {
       var image = ExifReader.ReadJpeg(inputImage);
       log.WriteLine("GpsLatitudeRef: " + image.GpsLatitudeRef);
-      log.WriteLine("GpsLatitude: " + image.GpsLatitude);
+      int latCount = 0;
+      foreach (var d in image.GpsLatitude)
+      {
+        log.WriteLine("GpsLatitude " + latCount + ": " + d);
+        latCount++;
+      }
+      
 
       log.WriteLine("GpsLongitudeRef: " + image.GpsLongitudeRef);
-      log.WriteLine("GpsLongitude: " + image.GpsLongitude);
+      int longCount = 0;
+      foreach (var d in image.GpsLongitude)
+      {
+        log.WriteLine("GpsLongitude " + longCount + ": " + d);
+        longCount++;
+      }
     }
   }
 }
