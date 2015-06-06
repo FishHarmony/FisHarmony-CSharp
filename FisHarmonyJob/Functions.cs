@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Text;
 using Microsoft.Azure.WebJobs;
 
 namespace FisHarmonyJob
@@ -43,42 +44,49 @@ namespace FisHarmonyJob
         if (!Enum.IsDefined(typeof (Type), propertyItem.Id))
           continue;
 
-        string value = "";
+        StringBuilder value = new StringBuilder();
         switch (propertyItem.Type)
         {
           case 1:
-            value = BitConverter.ToBoolean(propertyItem.Value, 0).ToString();
+            value.Append(BitConverter.ToBoolean(propertyItem.Value, 0).ToString());
             break;
           case 2:
-           value = encoding.GetString(propertyItem.Value, 0, propertyItem.Len - 1);
+           value.Append(encoding.GetString(propertyItem.Value, 0, propertyItem.Len - 1));
             break;
           case 3:
-            value = BitConverter.ToInt16(propertyItem.Value, 0).ToString();
+            value.Append(BitConverter.ToInt16(propertyItem.Value, 0).ToString());
             break;
           case 4:
           case 9:
-            value = BitConverter.ToInt32(propertyItem.Value, 0).ToString();
+            value.Append(BitConverter.ToInt32(propertyItem.Value, 0).ToString());
             break;
           case 5:
           case 10:
-            log.WriteLine("Length: " + propertyItem.Len);
-            UInt32 numberator = BitConverter.ToUInt32(propertyItem.Value, 0);
-            UInt32 denominator = BitConverter.ToUInt32(propertyItem.Value, 4);
+            int iterations = propertyItem.Len/8;
 
-            if(denominator != 0)
-              value = ((double)numberator / (double)denominator).ToString();
-            else
-              value = "0";
+            for (int i = 0; i < iterations; i++)
+            {
+              if (i > 0)
+                value.Append(" ");
+
+              UInt32 numberator = BitConverter.ToUInt32(propertyItem.Value, i*8);
+              UInt32 denominator = BitConverter.ToUInt32(propertyItem.Value, (i*8)+4);
+
+              if (denominator != 0)
+                value.Append(((double)numberator / (double)denominator).ToString());
+              else
+                value.Append("0");
+            }
 
             if (propertyItem.ToString() == "NaN")
-              value = "0";
+              value.Append("0");
             break;
           default:
-            value = "default";
+            value.Append("default");
             break;
         }
         
-        log.WriteLine(((Type)propertyItem.Id).ToString() + ": " + value);
+        log.WriteLine(((Type)propertyItem.Id).ToString() + ": " + value.ToString());
       }
     }
   }
