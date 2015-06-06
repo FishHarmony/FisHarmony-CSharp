@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.IO;
 using Microsoft.Azure.WebJobs;
 
@@ -32,13 +33,34 @@ namespace FisHarmonyJob
       TextWriter log)
     {
       Image image = Image.FromStream(inputImage);
+
+      System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
+      
       int count = 0;
       foreach (var propertyItem in image.PropertyItems)
       {
         log.WriteLine("Property Item " + count.ToString());
         log.WriteLine("ID: 0x" + propertyItem.Id.ToString("x"));
         log.WriteLine("type: " + propertyItem.Type.ToString());
-        log.WriteLine("value: " + propertyItem.Value.ToString());
+        switch (propertyItem.Type)
+        {
+          case 2:
+            log.WriteLine("value: " + encoding.GetString(propertyItem.Value));
+            break;
+          case 3:
+            log.WriteLine("value: " + Convert.ToInt16(propertyItem.Value));
+            break;
+          case 4:
+            log.WriteLine("value: " + Convert.ToInt32(propertyItem.Value));
+            break;
+          case 7:
+            log.WriteLine("value: undefined");
+            break;
+          default:
+            log.WriteLine("value: " + propertyItem.Value.ToString());
+            break;
+        }
+        
         log.WriteLine("length:" + propertyItem.Len.ToString() + " bytes" );
         count++;
       }
