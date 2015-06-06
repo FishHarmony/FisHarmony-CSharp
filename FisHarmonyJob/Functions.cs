@@ -39,7 +39,9 @@ namespace FisHarmonyJob
       Image image = Image.FromStream(inputImage);
 
       System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
-      
+
+      Dictionary<Type, string> values = new Dictionary<Type, string>();
+
       foreach (var propertyItem in image.PropertyItems)
       {
         if (!Enum.IsDefined(typeof (Type), propertyItem.Id))
@@ -102,8 +104,22 @@ namespace FisHarmonyJob
             value.Append("default");
             break;
         }
-        
-        log.WriteLine(((Type)propertyItem.Id).ToString() + ": " + value.ToString());
+        values.Add((Type)propertyItem.Id, value.ToString());
+      }
+
+      if (values.ContainsKey(Type.GPSLatitudeRef) && values.ContainsKey(Type.GPSLatitude) && values[Type.GPSLatitudeRef] == "S")
+      {
+        values[Type.GPSLatitude] = (decimal.Parse(values[Type.GPSLatitude])*-1).ToString();
+      }
+
+      if (values.ContainsKey(Type.GPSLongitudeRef) && values.ContainsKey(Type.GPSLongitude) && values[Type.GPSLongitudeRef] == "W")
+      {
+        values[Type.GPSLongitude] = (decimal.Parse(values[Type.GPSLongitude]) * -1).ToString();
+      }
+
+      foreach (var value in values)
+      {
+        Console.WriteLine(value.Key.ToString() + ": " + value.Value);
       }
     }
   }
