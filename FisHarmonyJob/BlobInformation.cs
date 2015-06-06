@@ -21,6 +21,6 @@ namespace FisHarmonyJob
         return Path.GetFileNameWithoutExtension(BlobName);
       }
     }
-    public int DeviceId { get; set; }
+    public int ReportId { get; set; }
   }
 }

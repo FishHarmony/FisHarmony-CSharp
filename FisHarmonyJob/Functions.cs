@@ -240,14 +240,14 @@ namespace FisHarmonyJob
       try
       {
         conn.Execute(
-        "UPDATE reports SET latitude = @latitude, longitude = @longitude, compass_direction = @compass_direction, picture_taken_at = @picture_taken_At WHERE submitter_id = @submitter_id",
+        "UPDATE reports SET latitude = @latitude, longitude = @longitude, compass_direction = @compass_direction, picture_taken_at = @picture_taken_At WHERE id = @id",
         new
         {
           latitude = values[Type.GPSLatitude],
           longitude = values[Type.GPSLongitude],
           compass_direction = values[Type.GPSImgDirection].ToString(),
           picture_taken_at = dateTime,
-          submitter_id = blobInfo.DeviceId
+          id = blobInfo.ReportId
         });
       }
       finally
