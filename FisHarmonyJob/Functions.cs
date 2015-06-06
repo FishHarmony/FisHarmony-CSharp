@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -63,7 +64,7 @@ namespace FisHarmonyJob
           case 5:
           case 10:
             int iterations = propertyItem.Len/8;
-
+            List<decimal> rational = new List<decimal>();
             for (int i = 0; i < iterations; i++)
             {
               if (i > 0)
@@ -73,13 +74,31 @@ namespace FisHarmonyJob
               UInt32 denominator = BitConverter.ToUInt32(propertyItem.Value, (i*8)+4);
 
               if (denominator != 0)
-                value.Append(((double)numberator / (double)denominator).ToString());
+               rational.Add((decimal)numberator / (decimal)denominator);
               else
-                value.Append("0");
+                rational.Add(0);
             }
 
-            if (propertyItem.ToString() == "NaN")
-              value.Append("0");
+            if (iterations == 3)
+            {
+              decimal degrees = rational[0];
+              decimal minutes = rational[1];
+              decimal seconds = rational[2];
+
+              var m = minutes + (seconds/60);
+              var d = m/60;
+              decimal decimalDegrees = degrees + d;
+              value.Append(decimalDegrees.ToString());
+            }
+            else
+            {
+              foreach (var dec in rational)
+              {
+                value.Append(dec.ToString());
+              }
+            }
+
+
             break;
           default:
             value.Append("default");
