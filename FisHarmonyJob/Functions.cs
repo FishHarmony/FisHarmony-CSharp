@@ -50,7 +50,7 @@ namespace FisHarmonyJob
             value = BitConverter.ToBoolean(propertyItem.Value, 0).ToString();
             break;
           case 2:
-           value = encoding.GetString(propertyItem.Value);
+           value = encoding.GetString(propertyItem.Value, 0, propertyItem.Len - 1);
             break;
           case 3:
             value = BitConverter.ToInt16(propertyItem.Value, 0).ToString();
