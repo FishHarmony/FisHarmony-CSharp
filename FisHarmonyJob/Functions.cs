@@ -117,6 +117,15 @@ namespace FisHarmonyJob
         values[Type.GPSLongitude] = (decimal.Parse(values[Type.GPSLongitude]) * -1).ToString();
       }
 
+      if (values.ContainsKey(Type.GPSTimeStamp) && values.ContainsKey(Type.GPSDateStamp))
+      {
+        DateTime dateTime;
+        if (DateTime.TryParse(values[Type.GPSDateStamp] + " " + values[Type.GPSTimeStamp], out dateTime))
+        {
+          log.WriteLine(dateTime.ToString());
+        }
+      }
+
       foreach (var value in values)
       {
         log.WriteLine(value.Key.ToString() + ": " + value.Value);
@@ -151,6 +160,7 @@ namespace FisHarmonyJob
     GPSDestBearingRef = 0x0017,
     GPSDestBearing = 0x0018,
     GPSDestDistanceRef = 0x0019,
-    GPSDestDistance = 0x001a
+    GPSDestDistance = 0x001a,
+    GPSDateStamp = 0x001d
   }
 }
