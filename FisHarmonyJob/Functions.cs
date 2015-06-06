@@ -31,7 +31,7 @@ namespace FisHarmonyJob
       output = text;
     }
 
-    public static void LoadImage([BlobTrigger("image/{name}")] Stream inputImage,
+    public static void LoadTestImage([BlobTrigger("test/{name}")] Stream inputImage,
       TextWriter log)
     {
       // North and East indicate positive, South and West indicate negative directions
