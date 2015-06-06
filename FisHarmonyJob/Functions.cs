@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using ExifLib;
 using Microsoft.Azure.WebJobs;
 
 namespace FisHarmonyJob
@@ -32,38 +33,12 @@ namespace FisHarmonyJob
     public static void LoadImage([BlobTrigger("image/{name}")] Stream inputImage,
       TextWriter log)
     {
-      Image image = Image.FromStream(inputImage);
+      var image = ExifReader.ReadJpeg(inputImage);
+      log.WriteLine("GpsLatitudeRef: " + image.GpsLatitudeRef);
+      log.WriteLine("GpsLatitude: " + image.GpsLatitude);
 
-      System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
-      
-      int count = 0;
-      foreach (var propertyItem in image.PropertyItems)
-      {
-        log.WriteLine("Property Item " + count.ToString());
-        log.WriteLine("ID: 0x" + propertyItem.Id.ToString("x"));
-        log.WriteLine("type: " + propertyItem.Type.ToString());
-        switch (propertyItem.Type)
-        {
-          case 2:
-            log.WriteLine("value: " + encoding.GetString(propertyItem.Value));
-            break;
-          case 3:
-            log.WriteLine("value: " + BitConverter.ToInt16(propertyItem.Value, 0));
-            break;
-          case 4:
-            log.WriteLine("value: " + BitConverter.ToInt32(propertyItem.Value, 0));
-            break;
-          case 7:
-            log.WriteLine("value: undefined");
-            break;
-          default:
-            log.WriteLine("value: " + propertyItem.Value.ToString());
-            break;
-        }
-        
-        log.WriteLine("length:" + propertyItem.Len.ToString() + " bytes" );
-        count++;
-      }
+      log.WriteLine("GpsLongitudeRef: " + image.GpsLongitudeRef);
+      log.WriteLine("GpsLongitude: " + image.GpsLongitude);
     }
   }
 }
