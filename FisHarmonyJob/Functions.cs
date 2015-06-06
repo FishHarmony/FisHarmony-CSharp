@@ -79,7 +79,8 @@ namespace FisHarmonyJob
                 rational.Add(0);
             }
 
-            if (iterations == 3)
+            if (iterations == 3 && (
+              (((Type)propertyItem.Id) == Type.GPSLatitude || ((Type)propertyItem.Id) == Type.GPSLongitude)))
             {
               decimal degrees = rational[0];
               decimal minutes = rational[1];
@@ -92,10 +93,7 @@ namespace FisHarmonyJob
             }
             else
             {
-              foreach (var dec in rational)
-              {
-                value.Append(dec.ToString());
-              }
+              value.Append(string.Join(":", rational));
             }
 
 
