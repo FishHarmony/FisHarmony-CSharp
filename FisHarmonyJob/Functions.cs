@@ -48,10 +48,10 @@ namespace FisHarmonyJob
             log.WriteLine("value: " + encoding.GetString(propertyItem.Value));
             break;
           case 3:
-            log.WriteLine("value: " + Convert.ToInt16(propertyItem.Value));
+            log.WriteLine("value: " + BitConverter.ToInt16(propertyItem.Value, 0));
             break;
           case 4:
-            log.WriteLine("value: " + Convert.ToInt32(propertyItem.Value));
+            log.WriteLine("value: " + BitConverter.ToInt32(propertyItem.Value, 0));
             break;
           case 7:
             log.WriteLine("value: undefined");
