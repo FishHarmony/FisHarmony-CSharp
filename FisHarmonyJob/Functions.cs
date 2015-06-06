@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 
 namespace FisHarmonyJob
@@ -7,9 +8,16 @@ namespace FisHarmonyJob
   {
     // This function will get triggered/executed when a new message is written 
     // on an Azure Queue called queue.
-    public static void ProcessBlob([BlobTrigger("test/{name}")] TextReader input, TextWriter log)
+    public static async Task ProcessBlob([BlobTrigger("test/{name}.{ext}")] Stream input, string name, string ext, TextWriter log)
     {
-      log.WriteLine(input.ReadToEnd());
+      log.WriteLine("Blob name:" + name);
+      log.WriteLine("Blod extension:" + ext);
+
+      using (StreamReader reader = new StreamReader(input))
+      {
+        string blobContent = await reader.ReadToEndAsync();
+        log.WriteLine("Blob content: {0}", blobContent);
+      }
     }
   }
 }
