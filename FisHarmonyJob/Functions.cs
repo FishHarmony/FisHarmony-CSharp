@@ -119,7 +119,7 @@ namespace FisHarmonyJob
 
       foreach (var value in values)
       {
-        Console.WriteLine(value.Key.ToString() + ": " + value.Value);
+        log.WriteLine(value.Key.ToString() + ": " + value.Value);
       }
     }
   }
