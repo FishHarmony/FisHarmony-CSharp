@@ -93,11 +93,14 @@ namespace FisHarmonyJob
               decimal decimalDegrees = degrees + d;
               value.Append(decimalDegrees.ToString());
             }
+            else if(((Type)propertyItem.Id) == Type.GPSDateStamp)
+            {
+              value.Append(string.Join("/", rational));
+            } 
             else
             {
               value.Append(string.Join(":", rational));
             }
-
 
             break;
           default:
