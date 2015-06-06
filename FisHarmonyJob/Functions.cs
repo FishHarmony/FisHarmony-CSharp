@@ -92,10 +92,6 @@ namespace FisHarmonyJob
               var d = m/60;
               decimal decimalDegrees = degrees + d;
               value.Append(decimalDegrees.ToString());
-            }
-            else if(((Type)propertyItem.Id) == Type.GPSDateStamp)
-            {
-              value.Append(string.Join("/", rational));
             } 
             else
             {
@@ -123,7 +119,7 @@ namespace FisHarmonyJob
       if (values.ContainsKey(Type.GPSTimeStamp) && values.ContainsKey(Type.GPSDateStamp))
       {
         DateTime dateTime;
-        if (DateTime.TryParse(values[Type.GPSDateStamp] + " " + values[Type.GPSTimeStamp], out dateTime))
+        if (DateTime.TryParse(values[Type.GPSDateStamp].Replace(":", "/") + " " + values[Type.GPSTimeStamp], out dateTime))
         {
           log.WriteLine(dateTime.ToString());
         }
