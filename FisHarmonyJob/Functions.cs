@@ -350,11 +350,13 @@ namespace FisHarmonyJob
                 grt = ais.GRT,
                 dwt = ais.DWT,
                 year_built = !string.IsNullOrEmpty(ais.YEAR_BUILT) ? (int?) int.Parse(ais.YEAR_BUILT) : null,
+                created_at = DateTime.UtcNow,
+                updated_at = DateTime.UtcNow
               };
               var rows =
                 conn.Query(
-                  "INSERT INTO asi_ships (mmsi, latitude, longitude, speed, course, timestamp, ship_name, ship_type, imo, callsign, flag, current_port, last_port, last_port_time, destination, eta, length, width, draught, grt, dwt, year_built) " +
-                  "VALUES (@mmsi, @latitude, @longitude, @speed, @course, @timestamp, @ship_name, @ship_type, @imo, @callsign, @flag, @current_port, @last_port, @last_port_time, @destination, @eta, @length, @width, @draught, @grt, @dwt, @year_built)" +
+                  "INSERT INTO asi_ships (mmsi, latitude, longitude, speed, course, timestamp, ship_name, ship_type, imo, callsign, flag, current_port, last_port, last_port_time, destination, eta, length, width, draught, grt, dwt, year_built, created_at, updated_at) " +
+                  "VALUES (@mmsi, @latitude, @longitude, @speed, @course, @timestamp, @ship_name, @ship_type, @imo, @callsign, @flag, @current_port, @last_port, @last_port_time, @destination, @eta, @length, @width, @draught, @grt, @dwt, @year_built, @created_at, @updated_at)" +
                   "RETURNING id",
                   new
                   {
@@ -379,10 +381,12 @@ namespace FisHarmonyJob
                     draught = entity.draught,
                     grt = entity.grt,
                     dwt = entity.dwt,
-                    year_built = entity.year_built
+                    year_built = entity.year_built,
+                    created_at = entity.created_at,
+                    updated_at = entity.updated_at
                   });
-              conn.Execute("INSERT INTO in_radius_ships (report_id, asi_ship_id) VALUES (@report_id, @asi_ship_id)",
-                new {report_id = blobInfo.ReportId, asi_ship_id = ((int) rows.FirstOrDefault().id)});
+              conn.Execute("INSERT INTO in_radius_ships (report_id, asi_ship_id, created_at, updated_at) VALUES (@report_id, @asi_ship_id, @created_at, @updated_at)",
+                new {report_id = blobInfo.ReportId, asi_ship_id = ((int) rows.FirstOrDefault().id), created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow});
             }
           }
         }
@@ -418,6 +422,8 @@ namespace FisHarmonyJob
     public string grt { get; set; }
     public string dwt { get; set; }
     public int? year_built { get; set; }
+    public DateTime created_at { get; set; }
+    public DateTime updated_at { get; set; }
   }
 
   [XmlRoot("POS")]
