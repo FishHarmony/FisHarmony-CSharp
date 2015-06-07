@@ -404,6 +404,13 @@ namespace FisHarmonyJob
                 });
             }
           }
+
+          conn.Execute("UPDATE reports SET verified = true WHERE id = @id",
+          new
+          {
+            id = blobInfo.ReportId
+          });
+
         }
         catch (Exception ex)
         {
