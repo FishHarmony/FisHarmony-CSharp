@@ -326,7 +326,7 @@ namespace FisHarmonyJob
             {
               latitude = latitude,
               longitude = longitude,
-              compass_direction = values[Type.GPSDestBearing].ToString(),
+              compass_direction = values.ContainsKey(Type.GPSDestBearing) ? values[Type.GPSDestBearing].ToString() : "",
               picture_taken_at = dateTime,
               id = blobInfo.ReportId
             });
