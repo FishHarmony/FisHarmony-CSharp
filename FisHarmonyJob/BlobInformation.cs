@@ -22,5 +22,8 @@ namespace FisHarmonyJob
       }
     }
     public int ReportId { get; set; }
+    public decimal? latitude { get; set; }
+    public decimal? longitude { get; set; }
+    public decimal? compassDirection { get; set; }
   }
 }
