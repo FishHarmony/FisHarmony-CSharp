@@ -277,6 +277,7 @@ namespace FisHarmonyJob
 
       var latitude = decimal.Parse(values[Type.GPSLatitude]) + LatMod;
       var longitude = decimal.Parse(values[Type.GPSLongitude]) + LongMod;
+      log.WriteLine("Middle Point: Lat:" + latitude + " Long:" + longitude + " LatMod:" + LatMod + " LongMod:" + LongMod);
       values[Type.GPSLatitude] = latitude.ToString();
       values[Type.GPSLongitude] = longitude.ToString();
 
