@@ -238,42 +238,48 @@ namespace FisHarmonyJob
         log.WriteLine(value.Key.ToString() + ": " + value.Value);
       }
 
-      decimal val = 0.007M;
-
       decimal LongMod = 0;
       decimal LatMod = 0;
+      decimal expand = 0.01M;
 
-      var mod = val / 90;
+      if (values.ContainsKey(Type.GPSDestBearing) && !string.IsNullOrEmpty(values[Type.GPSDestBearing]))
+      {
+        expand = 0.005M;
+        decimal val = 0.007M;
 
-      var orientation = decimal.Parse(values[Type.GPSDestBearing]);
+        var mod = val / 90;
 
-      if (orientation == 0)
-      {
-        LongMod = val;
+        var orientation = decimal.Parse(values[Type.GPSDestBearing]);
+
+        if (orientation == 0)
+        {
+          LongMod = val;
+        }
+        else if (orientation <= 90)
+        {
+          LatMod = val - (mod * orientation);
+          LongMod = mod * orientation;
+        }
+        else if (orientation > 90 && orientation <= 180)
+        {
+          var orientationMod = orientation - 90;
+          LongMod = val - (mod * orientationMod);
+          LatMod = (mod * orientationMod) * -1;
+        }
+        else if (orientation > 180 && orientation <= 270)
+        {
+          var orientationMod = orientation - 180;
+          LatMod = (val - (mod * orientationMod)) * -1;
+          LongMod = (mod * orientationMod) * -1;
+        }
+        else
+        {
+          var orientationMod = orientation - 270;
+          LongMod = (val - (mod * orientationMod)) * -1;
+          LatMod = (mod * orientationMod);
+        }
       }
-      else if (orientation <= 90)
-      {
-        LatMod = val - (mod * orientation);
-        LongMod = mod * orientation;
-      }
-      else if (orientation > 90 && orientation <= 180)
-      {
-        var orientationMod = orientation - 90;
-        LongMod = val - (mod * orientationMod);
-        LatMod = (mod * orientationMod) * -1;
-      }
-      else if (orientation > 180 && orientation <= 270)
-      {
-        var orientationMod = orientation - 180;
-        LatMod = (val - (mod * orientationMod)) * -1;
-        LongMod = (mod * orientationMod) * -1;
-      }
-      else
-      {
-        var orientationMod = orientation - 270;
-        LongMod = (val - (mod * orientationMod)) * -1;
-        LatMod = (mod * orientationMod);
-      }
+      
 
       var latitude = decimal.Parse(values[Type.GPSLatitude]) + LatMod;
       var longitude = decimal.Parse(values[Type.GPSLongitude]) + LongMod;
@@ -281,11 +287,11 @@ namespace FisHarmonyJob
       values[Type.GPSLatitude] = latitude.ToString();
       values[Type.GPSLongitude] = longitude.ToString();
 
-      decimal minLong = longitude - (decimal)0.005;
-      decimal minLat = latitude - (decimal)0.005;
+      decimal minLong = longitude - expand;
+      decimal minLat = latitude - expand;
 
-      decimal maxLong = longitude + (decimal)0.005;
-      decimal maxLat = latitude + (decimal)0.005;
+      decimal maxLong = longitude + expand;
+      decimal maxLat = latitude + expand;
 
       log.WriteLine("Searching in area minLong:" + minLong + " minLat:" + minLat + " maxLong:" + maxLong + " maxLat:" + maxLat);
 
