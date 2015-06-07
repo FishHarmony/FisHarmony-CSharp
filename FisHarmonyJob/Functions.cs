@@ -385,8 +385,13 @@ namespace FisHarmonyJob
                     created_at = entity.created_at,
                     updated_at = entity.updated_at
                   });
-              conn.Execute("INSERT INTO in_radius_ships (report_id, asi_ship_id, created_at, updated_at) VALUES (@report_id, @asi_ship_id, @created_at, @updated_at)",
-                new {report_id = blobInfo.ReportId, asi_ship_id = ((int) rows.FirstOrDefault().id), created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow});
+              conn.Execute("INSERT INTO in_radius_ships (report_id, asi_ship_id, distance_to_origin, created_at, updated_at) VALUES (@report_id, @asi_ship_id, st_distance_sphere(st_makepoint(@shiplat, @shiplon),st_makepoint(@originlat, @originlon)), @created_at, @updated_at)",
+                new {report_id = blobInfo.ReportId, asi_ship_id = ((int) rows.FirstOrDefault().id), 
+                  shiplat = entity.latitude.GetValueOrDefault(0),
+                  shiplon = entity.longitude.GetValueOrDefault(0),
+                  originlat = latitude,
+                  originlon = longitude,
+                  created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow});
             }
           }
         }
