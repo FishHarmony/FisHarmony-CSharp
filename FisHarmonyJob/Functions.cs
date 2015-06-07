@@ -286,6 +286,8 @@ namespace FisHarmonyJob
       decimal maxLong = longitude + (decimal)0.005;
       decimal maxLat = latitude + (decimal)0.005;
 
+      log.WriteLine("Searching in area minLong:" + minLong + " minLat:" + minLat + " maxLong:" + maxLong + " maxLat:" + maxLat);
+
       var key = ConfigurationManager.ConnectionStrings["AIS"].ConnectionString;
 
       var req =
@@ -312,15 +314,15 @@ namespace FisHarmonyJob
         try
         {
           conn.Execute(
-          "UPDATE reports SET latitude = @latitude, longitude = @longitude, compass_direction = @compass_direction, picture_taken_at = @picture_taken_At WHERE id = @id",
-          new
-          {
-            latitude = latitude,
-            longitude = longitude,
-            compass_direction = values[Type.GPSDestBearing].ToString(),
-            picture_taken_at = dateTime,
-            id = blobInfo.ReportId
-          });
+            "UPDATE reports SET latitude = @latitude, longitude = @longitude, compass_direction = @compass_direction, picture_taken_at = @picture_taken_At WHERE id = @id",
+            new
+            {
+              latitude = latitude,
+              longitude = longitude,
+              compass_direction = values[Type.GPSDestBearing].ToString(),
+              picture_taken_at = dateTime,
+              id = blobInfo.ReportId
+            });
           if (traffic != null)
           {
             foreach (var ais in traffic.POS)
@@ -353,6 +355,7 @@ namespace FisHarmonyJob
                 created_at = DateTime.UtcNow,
                 updated_at = DateTime.UtcNow
               };
+              log.WriteLine("Found Ship " + entity.mmsi + " " + entity.ship_name);
               var rows =
                 conn.Query(
                   "INSERT INTO asi_ships (mmsi, latitude, longitude, speed, course, timestamp, ship_name, ship_type, imo, callsign, flag, current_port, last_port, last_port_time, destination, eta, length, width, draught, grt, dwt, year_built, created_at, updated_at) " +
@@ -385,15 +388,25 @@ namespace FisHarmonyJob
                     created_at = entity.created_at,
                     updated_at = entity.updated_at
                   });
-              conn.Execute("INSERT INTO in_radius_ships (report_id, asi_ship_id, distance_to_origin, created_at, updated_at) VALUES (@report_id, @asi_ship_id, st_distance_sphere(st_makepoint(@shiplat, @shiplon),st_makepoint(@originlat, @originlon)), @created_at, @updated_at)",
-                new {report_id = blobInfo.ReportId, asi_ship_id = ((int) rows.FirstOrDefault().id), 
+              conn.Execute(
+                "INSERT INTO in_radius_ships (report_id, asi_ship_id, distance_to_origin, created_at, updated_at) VALUES (@report_id, @asi_ship_id, st_distance_sphere(st_makepoint(@shiplat, @shiplon),st_makepoint(@originlat, @originlon)), @created_at, @updated_at)",
+                new
+                {
+                  report_id = blobInfo.ReportId,
+                  asi_ship_id = ((int) rows.FirstOrDefault().id),
                   shiplat = entity.latitude.GetValueOrDefault(0),
                   shiplon = entity.longitude.GetValueOrDefault(0),
                   originlat = latitude,
                   originlon = longitude,
-                  created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow});
+                  created_at = DateTime.UtcNow,
+                  updated_at = DateTime.UtcNow
+                });
             }
           }
+        }
+        catch (Exception ex)
+        {
+          log.WriteLine(ex.Message + " Inner:" + ex.InnerException != null ? ex.InnerException.Message : "");
         }
         finally
         {
