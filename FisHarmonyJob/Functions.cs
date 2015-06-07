@@ -253,26 +253,26 @@ namespace FisHarmonyJob
       }
       else if (orientation <= 90)
       {
-        LongMod = val - (mod * orientation);
-        LatMod = mod * orientation;
+        LatMod = val - (mod * orientation);
+        LongMod = mod * orientation;
       }
       else if (orientation > 90 && orientation <= 180)
       {
         var orientationMod = orientation - 90;
-        LatMod = val - (mod * orientationMod);
-        LongMod = (mod * orientationMod) * -1;
+        LongMod = val - (mod * orientationMod);
+        LatMod = (mod * orientationMod) * -1;
       }
       else if (orientation > 180 && orientation <= 270)
       {
         var orientationMod = orientation - 180;
-        LongMod = (val - (mod * orientationMod)) * -1;
-        LatMod = (mod * orientationMod) * -1;
+        LatMod = (val - (mod * orientationMod)) * -1;
+        LongMod = (mod * orientationMod) * -1;
       }
       else
       {
         var orientationMod = orientation - 270;
-        LatMod = (val - (mod * orientationMod)) * -1;
-        LongMod = (mod * orientationMod);
+        LongMod = (val - (mod * orientationMod)) * -1;
+        LatMod = (mod * orientationMod);
       }
 
       var latitude = decimal.Parse(values[Type.GPSLatitude]) + LatMod;
