@@ -295,7 +295,21 @@ namespace FisHarmonyJob
 
       log.WriteLine("Searching in area minLong:" + minLong + " minLat:" + minLat + " maxLong:" + maxLong + " maxLat:" + maxLat);
 
-      var key = ConfigurationManager.ConnectionStrings["AIS"].ConnectionString;
+      NpgsqlConnection conn = new NpgsqlConnection(ConfigurationManager.ConnectionStrings["PostgreSQL"].ConnectionString);
+      conn.Open();
+
+      conn.Execute(
+        "UPDATE reports SET latitude = @latitude, longitude = @longitude, compass_direction = @compass_direction, picture_taken_at = @picture_taken_At, verified = true WHERE id = @id",
+        new
+        {
+          latitude = latitude,
+          longitude = longitude,
+          compass_direction = values.ContainsKey(Type.GPSDestBearing) ? values[Type.GPSDestBearing].ToString() : "",
+          picture_taken_at = dateTime,
+          id = blobInfo.ReportId
+        });
+
+      /*var key = ConfigurationManager.ConnectionStrings["AIS"].ConnectionString;
 
       var req =
         string.Format(
@@ -426,7 +440,7 @@ namespace FisHarmonyJob
         {
           conn.Close();
         }
-      }
+      }*/
     }
   }
 
