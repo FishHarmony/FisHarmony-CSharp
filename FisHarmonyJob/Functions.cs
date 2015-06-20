@@ -240,12 +240,21 @@ namespace FisHarmonyJob
 
       decimal LongMod = 0;
       decimal LatMod = 0;
-      decimal expand = 0.01M;
+      decimal expand = 0.015M;
+
+      if (blobInfo.compassDirection.HasValue && (!values.ContainsKey(Type.GPSDestBearing) || string.IsNullOrEmpty(values[Type.GPSDestBearing])))
+        values[Type.GPSDestBearing] = blobInfo.compassDirection.ToString();
+
+      if (blobInfo.longitude.HasValue && (!values.ContainsKey(Type.GPSLongitude) || string.IsNullOrEmpty(values[Type.GPSLongitude])))
+        values[Type.GPSLongitude] = blobInfo.longitude.ToString();
+
+      if (blobInfo.latitude.HasValue && (!values.ContainsKey(Type.GPSLatitude) || string.IsNullOrEmpty(values[Type.GPSLatitude])))
+        values[Type.GPSLatitude] = blobInfo.latitude.ToString();
 
       if (values.ContainsKey(Type.GPSDestBearing) && !string.IsNullOrEmpty(values[Type.GPSDestBearing]))
       {
-        expand = 0.005M;
-        decimal val = 0.007M;
+        expand = 0.008M; // was 0.005M
+        decimal val = 0.01M; // was 0.007M
 
         var mod = val / 90;
 
